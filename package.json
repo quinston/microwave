@@ -8,9 +8,12 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "devDependencies": {
+    "gulp": "^3.9.1",
     "gulp-istanbul": "^1.0.0",
     "gulp-mocha": "^2.2.0",
+    "gulp-typescript": "^2.13.6",
+    "remap-istanbul": "^0.6.4",
     "typescript": "^1.8.10"
   }
 }
