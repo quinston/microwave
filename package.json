@@ -1,0 +1,16 @@
+{
+  "name": "microwave",
+  "version": "1.0.0",
+  "description": "Microwave queue simulator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gulp-istanbul": "^1.0.0",
+    "gulp-mocha": "^2.2.0",
+    "typescript": "^1.8.10"
+  }
+}
