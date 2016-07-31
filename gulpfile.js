@@ -22,7 +22,7 @@ gulp.task('default', function() {
 });
 
 gulp.task('pre-test', ['default'], function () {
-	return gulp.src(['dist/**/*.js'])
+	return gulp.src(['dist/!(tests)/**/*.js'])
 	// Covering files
 		.pipe(istanbul())
 	// Force `require` to return covered files
@@ -31,16 +31,12 @@ gulp.task('pre-test', ['default'], function () {
 
 gulp.task('reports', ['pre-test'], function () {
 
-	gulp.src('dist/tests/**/*.js')
+	return gulp.src('dist/tests/**/*.js')
 		.pipe(mocha())
 		.pipe(istanbul.writeReports({
 			'reporters': ['lcovonly', 'json']
 		}))
 		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }))
-
-	gulp.watch('coverage/coverage-final.json', () => {
-		cb();
-	});
 });
 
 gulp.task('test', ['reports'], function() {
