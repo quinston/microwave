@@ -18,10 +18,10 @@ gulp.task('default', function() {
 		.pipe(ts(tsOptions))
 		.js
 		.pipe(sourcemaps.write())
-		.pipe(gulp.dest('dist'));
+		.pipe(gulp.dest('dist'))
 });
 
-gulp.task('pre-test', function () {
+gulp.task('pre-test', ['default'], function () {
 	return gulp.src(['dist/**/*.js'])
 	// Covering files
 		.pipe(istanbul())
@@ -29,21 +29,27 @@ gulp.task('pre-test', function () {
 		.pipe(istanbul.hookRequire());
 });
 
-gulp.task('test', ['pre-test'], function () {
-	gulp.src(['src/tests/**/*.ts'])
-		.pipe(ts(tsOptions))
-		.js.pipe(gulp.dest('dist/tests'))
-		.pipe(mocha())
-	// Creating the reports after tests ran
-		.pipe(istanbul.writeReports())
-	// Enforce a coverage of at least 90%
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
+gulp.task('reports', ['pre-test'], function () {
 
-	return gulp.src('coverage/coverage-final.json')
-		.pipe(remapIstanbul({
-			reports: {
-				'json': 'coverage/coverage-remapped.json',
-				'html': 'coverage/html-report'
-			}
-		}));
+	gulp.src('dist/tests/**/*.js')
+		.pipe(mocha())
+		.pipe(istanbul.writeReports({
+			'reporters': ['lcovonly', 'json']
+		}))
+		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }))
+
+	gulp.watch('coverage/coverage-final.json', () => {
+		cb();
+	});
+});
+
+gulp.task('test', ['reports'], function() {
+	return gulp.src(['coverage/coverage-final.json'])
+			.pipe(remapIstanbul({
+				reports: {
+					'json': 'coverage/coverage-remapped.json',
+					'html': 'coverage/lcov-report',
+					'text': null
+				}
+			}))
 });
