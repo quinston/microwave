@@ -3,14 +3,22 @@ const istanbul = require('gulp-istanbul');
 const mocha = require('gulp-mocha');
 const gulp = require('gulp');
 const remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
+const sourcemaps = require('gulp-sourcemaps')
+
+const tsOptions = {
+	noImplicitAny: true,
+	noImplicitReturns: true,
+	module: "commonjs",
+	target: "es6",
+}; 
 
 gulp.task('default', function() {
-	return gulp.src('src/**/*.ts')
-		.pipe(ts({
-			noImplicitAny: true,
-			noImplicitReturns: true,
-		}))
-		.js.pipe(gulp.dest("dist"));
+	return gulp.src(['src/**/*.ts'])
+		.pipe(sourcemaps.init())
+		.pipe(ts(tsOptions))
+		.js
+		.pipe(sourcemaps.write())
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('pre-test', function () {
@@ -22,16 +30,20 @@ gulp.task('pre-test', function () {
 });
 
 gulp.task('test', ['pre-test'], function () {
-	return gulp.src(['test/*.js'])
+	gulp.src(['src/tests/**/*.ts'])
+		.pipe(ts(tsOptions))
+		.js.pipe(gulp.dest('dist/tests'))
 		.pipe(mocha())
 	// Creating the reports after tests ran
 		.pipe(istanbul.writeReports())
 	// Enforce a coverage of at least 90%
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } }))
+		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }));
+
+	return gulp.src('coverage/coverage-final.json')
 		.pipe(remapIstanbul({
 			reports: {
-				'json': 'coverage.json',
-				'html': 'html-report'
+				'json': 'coverage/coverage-remapped.json',
+				'html': 'coverage/html-report'
 			}
 		}));
 });
