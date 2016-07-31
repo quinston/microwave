@@ -1,4 +1,5 @@
 import { Microwave, HungryThing, GameState } from '../models'
+import { s } from '../main'
 
 export class StateMachine {
 	choices(gs: GameState): Array<number> {
@@ -15,6 +16,7 @@ export class StateMachine {
 			i= 3;
 		}
 		else  {
+			s = s+1;
 			return [];
 		}
 	}

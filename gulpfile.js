@@ -22,7 +22,7 @@ gulp.task('default', function() {
 });
 
 gulp.task('pre-test', ['default'], function () {
-	return gulp.src(['dist/!(tests)/**/*.js'])
+	return gulp.src(['dist/!(tests)/**/*.js', 'dist/*.js'])
 	// Covering files
 		.pipe(istanbul())
 	// Force `require` to return covered files
@@ -36,7 +36,7 @@ gulp.task('reports', ['pre-test'], function () {
 		.pipe(istanbul.writeReports({
 			'reporters': ['lcovonly', 'json']
 		}))
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }))
+		.pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } }))
 });
 
 gulp.task('test', ['reports'], function() {
