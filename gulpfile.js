@@ -8,6 +8,7 @@ const sourcemaps = require('gulp-sourcemaps')
 const tsOptions = {
 	noImplicitAny: true,
 	noImplicitReturns: true,
+	noEmitOnError: true,
 	module: "commonjs",
 	target: "es6",
 }; 
@@ -36,7 +37,7 @@ gulp.task('reports', ['pre-test'], function () {
 		.pipe(istanbul.writeReports({
 			'reporters': ['lcovonly', 'json']
 		}))
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 100 } }))
+		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }))
 });
 
 gulp.task('test', ['reports'], function() {
