@@ -177,4 +177,127 @@ describe('State machine', () => {
 	   .reduce((acc, x) => sm.makeChoice(acc, x), gs))
 	   .to.throw(Error)
 	})
+
+	it('should decrement microwave timer readout', () => {
+		const m1: Microwave = { timeLeft: 20, line: [] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1]
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 1)).to.eql({
+			line: [],
+			microwaves: [{
+				timeLeft: 19,
+				line: []
+			}]
+		})
+
+		expect(sm.advanceTime(gs, 13)).to.eql({
+			line: [],
+			microwaves: [{
+				timeLeft: 7,
+				line: []
+			}]
+		})
+	})
+
+	it('should not accept times that are not nonnegative integers', () => {
+		const m1: Microwave = { timeLeft: 20, line: [] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1]
+		}
+		const sm = new StateMachine
+
+		expect(() => sm.advanceTime(gs, 1.2)).to.throw(Error)
+		expect(() => sm.advanceTime(gs, -1)).to.throw(Error)
+		expect(() => sm.advanceTime(gs, 0)).to.not.throw(Error)
+	})
+
+	it('should advance time for more than one microwave', () => {
+		const m1: Microwave = { timeLeft: 20, line: [] }
+		const m2: Microwave = { timeLeft: 33, line: [] }
+		const m3: Microwave = { timeLeft: 12, line: [] }
+
+		expect((new StateMachine).advanceTime({
+			line: [],
+			microwaves: [m1, m2, m3]
+		}, 9)).to.eql({
+			line: [],
+			microwaves: [{ timeLeft: 11, line: [] },
+				{ timeLeft: 24, line: [] },
+				{ timeLeft: 3, line: [] }]
+		})
+	})
+
+	it('should advance line once microwave readout runs out', () => {
+		const x1: HungryThing = { name: '', desiredMicrowaveTime: 57 }
+		const m1: Microwave = { timeLeft: 3, line: [x1] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1]
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 3)).to.eql({
+			line: [],
+			microwaves: [{ timeLeft: 57, line: [] }]
+		})
+
+	})
+
+	it('should advance line, reset microwave readout, and decrement microwave readout if time to advance is longer than microwave readout', () => {
+		const x1: HungryThing = { name: '', desiredMicrowaveTime: 57 }
+		const m1: Microwave = { timeLeft: 3, line: [x1] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1]
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 30)).to.eql({
+			line: [],
+			microwaves: [{ timeLeft: 30, line: [] }]
+		})
+	})
+
+	it('should advance line multiple times when time elapses', () => {
+		const x1: HungryThing = { name: '', desiredMicrowaveTime: 7 }
+		const x2: HungryThing = { name: '', desiredMicrowaveTime: 3 }
+		const m1: Microwave = { timeLeft: 6, line: [x1, x1, x2] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1]
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 21)).to.eql({
+			line: [],
+			microwaves: [{ timeLeft: 2, line: [] }]
+		})
+	})
+
+	it('should advance the lines of multiple microwaves', () => {
+		const x1: HungryThing = { name: '', desiredMicrowaveTime: 7 }
+		const x2: HungryThing = { name: '', desiredMicrowaveTime: 3 }
+		const m1: Microwave = { timeLeft: 6, line: [x1, x1, x2] }
+		const m2: Microwave = { timeLeft: 2, line: [x2, x1] }
+		const m3: Microwave = { timeLeft: 14, line: [x2, x1, x2, x2] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1, m2, m3]
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 21)).to.eql({
+			line: [],
+			microwaves: [
+				{ timeLeft: 2, line: [] },
+				{ timeLeft: 0, line: [] },
+				{ timeLeft: 3, line: [x2, x2] }
+			]
+		})
+	})
 })

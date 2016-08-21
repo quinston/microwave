@@ -37,7 +37,6 @@ gulp.task('reports', ['pre-test'], function () {
 		.pipe(istanbul.writeReports({
 			'reporters': ['lcovonly', 'json']
 		}))
-		.pipe(istanbul.enforceThresholds({ thresholds: { global: 95 } }))
 });
 
 gulp.task('test', ['reports'], function() {
@@ -50,3 +49,4 @@ gulp.task('test', ['reports'], function() {
 				}
 			}))
 });
+
