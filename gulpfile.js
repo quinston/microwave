@@ -47,6 +47,9 @@ gulp.task('test', ['reports'], function() {
 					'html': 'coverage/lcov-report',
 					'text': null
 				}
-			}))
+			}));
 });
 
+gulp.task('watch', ['test'], function() {
+	return gulp.watch('src/**/*.ts', ['test']);
+})
