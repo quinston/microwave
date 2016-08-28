@@ -10,7 +10,8 @@ describe('State machine', () => {
 	it('should offer no choices', () => {
 		const gs: GameState = {
 			line: [],
-			microwaves: []
+			microwaves: [],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -24,7 +25,8 @@ describe('State machine', () => {
 
 		const gs: GameState = {
 			line: [x],
-			microwaves: [m]
+			microwaves: [m],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -36,7 +38,8 @@ describe('State machine', () => {
 		const m: Microwave = { timeLeft: 0, line: [] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m]
+			microwaves: [m],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -50,7 +53,8 @@ describe('State machine', () => {
 		const m2: Microwave = { timeLeft: 0, line: [] }
 		const gs: GameState = {
 			line: [x],
-			microwaves: [m1, m2]
+			microwaves: [m1, m2],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -63,7 +67,8 @@ describe('State machine', () => {
 		const m: Microwave = { timeLeft: 10, line: [x] }
 		const gs: GameState = {
 			line: [x],
-			microwaves: [m]
+			microwaves: [m],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -73,7 +78,8 @@ describe('State machine', () => {
 			microwaves: [{
 				timeLeft: 10,
 				line: [x, x]
-			}]
+			}],
+			makespan: 0
 		})
 	})
 
@@ -82,7 +88,8 @@ describe('State machine', () => {
 		const m: Microwave = { timeLeft: 10, line: [x] }
 		const gs: GameState = {
 			line: [x],
-			microwaves: [m]
+			microwaves: [m],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -96,7 +103,8 @@ describe('State machine', () => {
 		const m2: Microwave = { timeLeft: 11, line: [x] }
 		const gs: GameState = {
 			line: [x],
-			microwaves: [m, m2]
+			microwaves: [m, m2],
+			makespan: 0
 		}
 
 		const sm = new StateMachine
@@ -109,7 +117,8 @@ describe('State machine', () => {
 			}, {
 				timeLeft: 11,
 				line: [x]
-			}]
+			}],
+			makespan: 0
 		})
 
 		expect(sm.makeChoice(gs, 1)).to.eql({
@@ -120,7 +129,8 @@ describe('State machine', () => {
 			}, {
 				timeLeft: 11,
 				line: [x, x]
-			}]
+			}],
+			makespan: 0
 		})
 	})
 
@@ -129,7 +139,8 @@ describe('State machine', () => {
 		const m2: Microwave = { timeLeft: 11, line: [] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m, m2]
+			microwaves: [m, m2],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -144,7 +155,8 @@ describe('State machine', () => {
 		const m2: Microwave = { timeLeft: 11, line: [x2, x1, x2] }
 		const gs: GameState = {
 			line: [x1, x2, x1, x2, x1, x2, x1, x2],
-			microwaves: [m1, m2]
+			microwaves: [m1, m2],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -157,7 +169,8 @@ describe('State machine', () => {
 			{
 				timeLeft: 11,
 				line: [x2, x1, x2]
-			}]
+			}],
+			makespan: 0
 		})
 
 		expect([0, 1, 1, 0, 0, 1, 0].reduce((acc, x) => sm.makeChoice(acc, x), gs)).to.eql({
@@ -169,7 +182,8 @@ describe('State machine', () => {
 			{
 				timeLeft: 11,
 				line: [x2, x1, x2, x2, x1, x2]
-			}]
+			}],
+			makespan: 0
 		})
 
 		// one too many
@@ -178,11 +192,26 @@ describe('State machine', () => {
 	   .to.throw(Error)
 	})
 
+
+	it('should advance recorded makespan', () => {
+		const x1: HungryThing = { name: '', desiredMicrowaveTime: 10 }
+		const m1: Microwave = { timeLeft: 5, line: [x1] }
+		const gs: GameState = {
+			line: [],
+			microwaves: [m1],
+			makespan: 10
+		}
+		const sm = new StateMachine
+
+		expect(sm.advanceTime(gs, 2).makespan).to.eql(12)
+	})
+
 	it('should decrement microwave timer readout', () => {
 		const m1: Microwave = { timeLeft: 20, line: [] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1]
+			microwaves: [m1],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -191,7 +220,8 @@ describe('State machine', () => {
 			microwaves: [{
 				timeLeft: 19,
 				line: []
-			}]
+			}],
+			makespan: 1
 		})
 
 		expect(sm.advanceTime(gs, 13)).to.eql({
@@ -199,7 +229,8 @@ describe('State machine', () => {
 			microwaves: [{
 				timeLeft: 7,
 				line: []
-			}]
+			}],
+			makespan: 13
 		})
 	})
 
@@ -207,7 +238,8 @@ describe('State machine', () => {
 		const m1: Microwave = { timeLeft: 20, line: [] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1]
+			microwaves: [m1],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -223,12 +255,14 @@ describe('State machine', () => {
 
 		expect((new StateMachine).advanceTime({
 			line: [],
-			microwaves: [m1, m2, m3]
+			microwaves: [m1, m2, m3],
+			makespan: 0
 		}, 9)).to.eql({
 			line: [],
 			microwaves: [{ timeLeft: 11, line: [] },
 				{ timeLeft: 24, line: [] },
-				{ timeLeft: 3, line: [] }]
+				{ timeLeft: 3, line: [] }],
+			makespan: 9
 		})
 	})
 
@@ -237,13 +271,15 @@ describe('State machine', () => {
 		const m1: Microwave = { timeLeft: 3, line: [x1] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1]
+			microwaves: [m1],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
 		expect(sm.advanceTime(gs, 3)).to.eql({
 			line: [],
-			microwaves: [{ timeLeft: 57, line: [] }]
+			microwaves: [{ timeLeft: 57, line: [] }],
+			makespan: 3
 		})
 
 	})
@@ -253,13 +289,15 @@ describe('State machine', () => {
 		const m1: Microwave = { timeLeft: 3, line: [x1] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1]
+			microwaves: [m1],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
 		expect(sm.advanceTime(gs, 30)).to.eql({
 			line: [],
-			microwaves: [{ timeLeft: 30, line: [] }]
+			microwaves: [{ timeLeft: 30, line: [] }],
+			makespan: 30
 		})
 	})
 
@@ -269,13 +307,15 @@ describe('State machine', () => {
 		const m1: Microwave = { timeLeft: 6, line: [x1, x1, x2] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1]
+			microwaves: [m1],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
 		expect(sm.advanceTime(gs, 21)).to.eql({
 			line: [],
-			microwaves: [{ timeLeft: 2, line: [] }]
+			microwaves: [{ timeLeft: 2, line: [] }],
+			makespan: 21
 		})
 	})
 
@@ -287,7 +327,8 @@ describe('State machine', () => {
 		const m3: Microwave = { timeLeft: 14, line: [x2, x1, x2, x2] }
 		const gs: GameState = {
 			line: [],
-			microwaves: [m1, m2, m3]
+			microwaves: [m1, m2, m3],
+			makespan: 0
 		}
 		const sm = new StateMachine
 
@@ -297,7 +338,8 @@ describe('State machine', () => {
 				{ timeLeft: 2, line: [] },
 				{ timeLeft: 0, line: [] },
 				{ timeLeft: 3, line: [x2, x2] }
-			]
+			],
+			makespan: 21
 		})
 	})
 })

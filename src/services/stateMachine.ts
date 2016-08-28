@@ -30,14 +30,17 @@ export class StateMachine {
 	advanceTime(gs: GameState, time: number): GameState {
 		if (time === Math.floor(time) && time >= 0) {
 			const newGs: GameState = clone(gs)
+			let timeElapsed = 0
 			newGs.microwaves.forEach(m => {
 				let timeToAdvance = time
 				while (timeToAdvance >= m.timeLeft && m.line.length > 0) {
 					timeToAdvance -= m.timeLeft
 					m.timeLeft = m.line.shift().desiredMicrowaveTime
 				}
+				timeElapsed = Math.max(timeElapsed, (time - timeToAdvance) + Math.min(m.timeLeft, timeToAdvance))
 				m.timeLeft = Math.max(0, m.timeLeft - timeToAdvance)
 			})
+			newGs.makespan += timeElapsed
 			return newGs
 		}
 		else {
